@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:todo_clientserver_flutter_app/models/statictasks.dart';
+import 'package:todo_clientserver_flutter_app/dbs/statictasks.dart';
 import 'package:todo_clientserver_flutter_app/models/task.dart';
 import 'package:http/http.dart' as http;
 import 'package:todo_clientserver_flutter_app/pages/add_task_page.dart';
