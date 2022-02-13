@@ -36,7 +36,9 @@ class _TasksListPageState extends State<TasksListPage> {
 
   Future<int> fetchAllTask() async {
     final response = await http.get(Uri.parse(phone1));
-    List<dynamic> jsonTaskString = jsonDecode(response.body);
+    final body = utf8.decode(response.bodyBytes);
+    print(body);
+    List<dynamic> jsonTaskString = jsonDecode(body);
     Tasks.tasks = [];
     for (var i = 0; i < jsonTaskString.length; i++) {
       Tasks.tasks.add(
