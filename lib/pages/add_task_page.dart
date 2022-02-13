@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo_clientserver_flutter_app/dbs/statictasks.dart';
 import 'package:todo_clientserver_flutter_app/models/task.dart';
 import 'package:todo_clientserver_flutter_app/services/hosts.dart';
 import 'package:http/http.dart' as http;
@@ -55,6 +56,11 @@ class _addTaskPageState extends State<addTaskPage> {
         value ??= '';
         if (value.isEmpty || value == '') {
           return "Invalid title!";
+        }
+        for (var i = 0; i < Tasks.tasks.length; i++) {
+          if (Tasks.tasks[i].title == value) {
+            return "this title is repeated";
+          }
         }
         return null;
       },
