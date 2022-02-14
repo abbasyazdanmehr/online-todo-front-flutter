@@ -1,21 +1,25 @@
 import 'dart:convert';
 
 class Task {
+  int id = 0;
   String title = '';
   String description = '';
   bool status = false;
   Task({
+    this.id = 0,
     required this.title,
     required this.description,
     required this.status,
   });
 
   Task copyWith({
+    int? id,
     String? title,
     String? description,
     bool? status,
   }) {
     return Task(
+      id: id ?? this.id,
       title: title ?? this.title,
       description: description ?? this.description,
       status: status ?? this.status,
@@ -32,6 +36,7 @@ class Task {
 
   factory Task.fromMap(Map<String, dynamic> map) {
     return Task(
+      id: map['id'],
       title: map['title'],
       description: map['description'],
       status: map['status'],
@@ -44,7 +49,7 @@ class Task {
 
   @override
   String toString() =>
-      'Task(title: $title, description: $description, status: $status)';
+      'Task(id: $id, title: $title, description: $description, status: $status)';
 
   @override
   bool operator ==(Object other) {

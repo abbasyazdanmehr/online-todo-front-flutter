@@ -1,30 +1,46 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:todo_clientserver_flutter_app/dbs/statictasks.dart';
 import 'package:todo_clientserver_flutter_app/models/task.dart';
 import 'package:todo_clientserver_flutter_app/services/hosts.dart';
 import 'package:http/http.dart' as http;
 
-class addTaskPage extends StatefulWidget {
-  const addTaskPage({Key? key}) : super(key: key);
+class UpdateTaskPage extends StatefulWidget {
+  int index;
+  UpdateTaskPage(this.index, {Key? key}) : super(key: key);
 
   @override
-  _addTaskPageState createState() => _addTaskPageState();
+  _UpdateTaskPageState createState() => _UpdateTaskPageState();
 }
 
-class _addTaskPageState extends State<addTaskPage> {
+class _UpdateTaskPageState extends State<UpdateTaskPage> {
   final _formKey = GlobalKey<FormState>();
   String _inputTitle = '';
   String _inputDescription = '';
+  bool _inputStatus = false;
 
-  Future<int> pushTask(Task task) async {
-    final response = await http.post(
-      Uri.parse(phone1 + '/tasknew'),
+  @override
+  initState() {
+    super.initState();
+    _inputStatus = Tasks.tasks[widget.index].status;
+  }
+
+  Future<int> updateTask(Task updatedTask) async {
+    print(phone1 + '/updatetask/${updatedTask.id}/');
+    final response = await http.put(
+      Uri.parse(phone1 + '/updatetask/${updatedTask.id}/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
-      body: task.toJson(),
+      body: jsonEncode(<String, String>{
+        'title': updatedTask.title,
+        'description': updatedTask.description,
+        'status': updatedTask.status ? "true" : "false"
+      }),
     );
-    return response.statusCode;
+    print(response.statusCode);
+    return 0;
   }
 
   signinForm(w, h) {
@@ -39,6 +55,7 @@ class _addTaskPageState extends State<addTaskPage> {
               titleField(),
               heightGap(0.05 * h),
               descriptionField(),
+              statusSwitch(),
             ],
           ),
         ),
@@ -48,6 +65,7 @@ class _addTaskPageState extends State<addTaskPage> {
 
   titleField() {
     return TextFormField(
+      initialValue: Tasks.tasks[widget.index].title,
       style: const TextStyle(fontSize: 25),
       decoration: const InputDecoration(
         icon: Icon(Icons.title),
@@ -58,6 +76,7 @@ class _addTaskPageState extends State<addTaskPage> {
           return "Invalid title!";
         }
         for (var i = 0; i < Tasks.tasks.length; i++) {
+          if (i == widget.index) continue;
           if (Tasks.tasks[i].title == value) {
             return "this title is repeated";
           }
@@ -72,6 +91,7 @@ class _addTaskPageState extends State<addTaskPage> {
 
   descriptionField() {
     return TextFormField(
+      initialValue: Tasks.tasks[widget.index].description,
       maxLines: 2,
       style: const TextStyle(fontSize: 25),
       decoration: const InputDecoration(
@@ -90,6 +110,19 @@ class _addTaskPageState extends State<addTaskPage> {
     );
   }
 
+  statusSwitch() {
+    return IconButton(
+      onPressed: () {
+        _inputStatus = !_inputStatus;
+        setState(() {});
+        print(_inputStatus);
+      },
+      icon: _inputStatus
+          ? const Icon(Icons.check_circle_sharp)
+          : const Icon(Icons.radio_button_unchecked),
+    );
+  }
+
   signinButton(w, h) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
@@ -100,11 +133,12 @@ class _addTaskPageState extends State<addTaskPage> {
         if (_formKey.currentState!.validate()) {
           _formKey.currentState!.save();
 
-          pushTask(
+          updateTask(
             Task(
+              id: Tasks.tasks[widget.index].id,
               title: _inputTitle,
               description: _inputDescription,
-              status: false,
+              status: _inputStatus,
             ),
           );
 
@@ -113,7 +147,7 @@ class _addTaskPageState extends State<addTaskPage> {
           setState(() {});
         }
       },
-      child: const Text("Add Task"),
+      child: const Text("Update"),
     );
   }
 
@@ -123,7 +157,7 @@ class _addTaskPageState extends State<addTaskPage> {
       height: 0.2 * h,
       child: Center(
         child: Text(
-          "Add Task",
+          "Update",
           style: TextStyle(
             fontSize: 0.1 * h,
           ),
@@ -139,7 +173,7 @@ class _addTaskPageState extends State<addTaskPage> {
         borderRadius: BorderRadius.circular(30),
       ),
       width: 0.8 * w,
-      height: 0.5 * h,
+      height: 0.6 * h,
       child: Stack(
         alignment: Alignment.center,
         children: [

@@ -5,6 +5,7 @@ import 'package:todo_clientserver_flutter_app/dbs/statictasks.dart';
 import 'package:todo_clientserver_flutter_app/models/task.dart';
 import 'package:http/http.dart' as http;
 import 'package:todo_clientserver_flutter_app/pages/add_task_page.dart';
+import 'package:todo_clientserver_flutter_app/pages/update_task_page.dart';
 import 'package:todo_clientserver_flutter_app/services/hosts.dart';
 
 class TasksListPage extends StatefulWidget {
@@ -32,17 +33,19 @@ class _TasksListPageState extends State<TasksListPage> {
     // });
 
     fetchAllTask();
+    setState(() {});
   }
 
   Future<int> fetchAllTask() async {
     final response = await http.get(Uri.parse(phone1));
     final body = utf8.decode(response.bodyBytes);
-    print(body);
     List<dynamic> jsonTaskString = jsonDecode(body);
     Tasks.tasks = [];
     for (var i = 0; i < jsonTaskString.length; i++) {
+      print(jsonTaskString[i]['id']);
       Tasks.tasks.add(
         Task(
+          id: jsonTaskString[i]['id'],
           title: jsonTaskString[i]['title'],
           description: jsonTaskString[i]['description'],
           status: jsonTaskString[i]['status'],
@@ -63,7 +66,7 @@ class _TasksListPageState extends State<TasksListPage> {
     }
   }
 
-  Future<http.Response> deleteAlbum(int index) async {
+  Future<http.Response> deleteTask(int index) async {
     final http.Response response = await http.delete(
       Uri.parse(phone1 + '/taskdestroy/${Tasks.tasks[index].title}/'),
       headers: <String, String>{
@@ -89,6 +92,12 @@ class _TasksListPageState extends State<TasksListPage> {
       child: InkWell(
         onLongPress: () {
           _showMyDialog(i);
+        },
+        onDoubleTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => UpdateTaskPage(i)),
+          );
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,7 +134,7 @@ class _TasksListPageState extends State<TasksListPage> {
             TextButton(
               child: const Text('Yes'),
               onPressed: () {
-                deleteAlbum(index);
+                deleteTask(index);
                 fetchAllTask();
                 Navigator.of(context).pop();
               },
@@ -142,6 +151,12 @@ class _TasksListPageState extends State<TasksListPage> {
       appBar: AppBar(
         title: const Text('ToDo'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.settings),
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: () async {
